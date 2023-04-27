@@ -5,7 +5,41 @@ const mongoose = require('mongoose');
 const Product = require('../models/product');
 const bodyParser = require('body-parser');
 const multer = require('multer');
-const upload = multer({dest: 'uploads/'});
+
+
+
+
+const storage = multer.diskStorage({
+    destination: function(req, file, cb){
+        cb(null, './uploads/');
+    },
+
+    filename: function(req, file, cb){
+            cb(null, new Date().toISOString() + file.originalname);
+    }
+});
+
+// function to accept/reject the files that are to be uploaded (does not save it)
+const fileFilter = (req, res, cb) => {
+    if(file.mimetype === 'image/jpeg'|| file.mimetype === 'image/png'){
+        cb(null, true);  // accepts the file
+    } else{
+        cb(null, false); // rejects the file
+    }
+    
+   
+}
+
+//function to upload the files
+const upload = multer({
+    storage: storage, 
+    limits: {
+    fileSize: 1024 * 1024 * 5 //measured in bytes so 1024 * 1024 bytes = 1 megabyte
+},
+  fileFilter: fileFilter
+
+});
+
 // / -> root
 // /a -> in (a)
 // . -> THIS dir path
@@ -56,7 +90,7 @@ router.get('/', (req, res, next) => {
     }); //we can put where or limit but we are using exec to fetch all
 });
 
-router.post("/", upload.single('productImage'),(req, res, next) => {
+router.post("/", upload.single('urImage'),(req, res, next) => {
 console.log(req.file);
 
     // console.log(req.body); this code can be written to see what contents are being passed to the POST request
@@ -160,3 +194,5 @@ router.delete('/:productId', (req, res, next) => {
 });
 
 module.exports = router;
+
+
